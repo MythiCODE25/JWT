@@ -264,6 +264,16 @@ app.get("/dashboard", requireAuth, async (req, res) => {
         message: "User not found",
       });
     }
+
+    // Return a welcome message using the user's name; if unavailable, use email
+    const displayName = user.name && user.name.trim() ? user.name.trim() : user.email;
+    const welcomeMessage = `Welcome, ${displayName}!`;
+
+    return res.status(200).json({
+      message: welcomeMessage,
+      email: user.email,
+      name: user.name,
+    });
   } catch (error) {
     console.error("Error in /dashboard route:", error);
     return res.status(500).json({
