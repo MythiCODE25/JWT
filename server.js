@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const prisma = require("./prismaClient");
+const { requireAuth } = require("./middleware/auth");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -203,6 +204,31 @@ app.post("/login", async (req, res) => {
     return res.status(500).json({
       error: "Internal Server Error",
       message: "An unexpected error occurred during login",
+    });
+  }
+});
+
+// 4. Get User Profile – GET /me
+app.get("/me", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Use authenticated user's ID to fetch details from database
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "User not found",
+      });
+    }
+  } catch (error) {
+    console.error("Error in /me route:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An unexpected error occurred while fetching user profile",
     });
   }
 });
