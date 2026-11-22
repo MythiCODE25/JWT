@@ -166,6 +166,38 @@ app.post("/login", async (req, res) => {
     if (!isPasswordValid) {
       return invalidAuthResponse();
     }
+
+    // If authentication succeeds, generate a JWT containing the user's ID and email
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      JWTSECRET,
+      {
+        expiresIn: "1h",
+        jwtid: crypto.randomUUID(),
+      }
+    );
+
+    // Return the user's basic details and JWT
+    const userDetails = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt,
+    };
+
+    return res.status(200).json({
+      message: "Login successful",
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt,
+      user: userDetails,
+      token,
+      jwt: token,
+    });
   } catch (error) {
     console.error("Error in /login validation:", error);
     return res.status(500).json({
