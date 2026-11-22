@@ -224,6 +224,16 @@ app.get("/me", requireAuth, async (req, res) => {
         message: "User not found",
       });
     }
+
+    // Return the user's ID, email, name, and account creation date (excluding password)
+    const userProfile = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt,
+    };
+
+    return res.status(200).json(userProfile);
   } catch (error) {
     console.error("Error in /me route:", error);
     return res.status(500).json({
