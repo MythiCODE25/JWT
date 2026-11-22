@@ -243,6 +243,36 @@ app.get("/me", requireAuth, async (req, res) => {
   }
 });
 
+// 5. User Dashboard – GET /dashboard
+app.get("/dashboard", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Fetch the authenticated user's email and name from the database
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "User not found",
+      });
+    }
+  } catch (error) {
+    console.error("Error in /dashboard route:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An unexpected error occurred while loading the dashboard",
+    });
+  }
+});
+
 // Start the server if executed directly
 if (require.main === module) {
   app.listen(PORT, () => {
